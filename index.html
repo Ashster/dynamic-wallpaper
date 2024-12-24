@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>动态壁纸生成器</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            background-color: #faf7ff;
+        }
+
+        .container {
+            display: flex;
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .control-panel {
+            flex: 0 0 320px;
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(162, 136, 241, 0.1);
+        }
+
+        .section {
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #f0e8ff;
+        }
+
+        .section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #6b4fbb;
+            font-size: 15px;
+        }
+
+        .emoji-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+        }
+
+        .emoji-btn {
+            width: 100%;
+            aspect-ratio: 1;
+            font-size: 24px;
+            border: 1px solid #f0e8ff;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: all 0.2s ease;
+        }
+
+        .emoji-btn:hover {
+            background: #faf7ff;
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(162, 136, 241, 0.15);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        #emojiInput {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid #f0e8ff;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.2s ease;
+        }
+
+        #emojiInput:focus {
+            outline: none;
+            border-color: #8b6bff;
+            box-shadow: 0 0 0 3px rgba(139, 107, 255, 0.1);
+        }
+
+        #addEmojiBtn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 12px;
+            background: #8b6bff;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        #addEmojiBtn:hover {
+            background: #7857f7;
+            transform: translateY(-1px);
+        }
+
+        .upload-container {
+            width: 100%;
+        }
+
+        .upload-btn {
+            display: block;
+            width: calc(100% - 24px);
+            padding: 12px;
+            background: #8b6bff;
+            color: white;
+            text-align: center;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .upload-btn:hover {
+            background: #7857f7;
+            transform: translateY(-1px);
+        }
+
+        .preview-list {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .preview-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #faf7ff;
+            border: 1px solid #f0e8ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-item img {
+            width: 70%;
+            height: 70%;
+            object-fit: contain;
+            padding: 0;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 59, 48, 0.9);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .delete-btn:hover {
+            transform: scale(1.1);
+            background: rgb(255, 59, 48);
+        }
+
+        .control-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #f0e8ff;
+            border-radius: 12px;
+            font-size: 14px;
+            color: #6b4fbb;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .control-select:focus {
+            outline: none;
+            border-color: #8b6bff;
+            box-shadow: 0 0 0 3px rgba(139, 107, 255, 0.1);
+        }
+
+        .canvas-container {
+            flex: 1;
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(162, 136, 241, 0.1);
+            position: relative;
+        }
+
+        canvas {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .canvas-info {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(139, 107, 255, 0.9);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .control-group {
+            margin-top: 16px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #6b4fbb;
+            font-size: 14px;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            margin-bottom: 4px;
+            accent-color: #8b6bff;
+        }
+
+        .control-group span {
+            font-size: 13px;
+            color: #8b6bff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="control-panel">
+            <div class="section">
+                <div class="section-title">添加 Emoji</div>
+                <div class="emoji-container">
+                    <div class="emoji-grid">
+                        <button class="emoji-btn">😀</button>
+                        <button class="emoji-btn">😂</button>
+                        <button class="emoji-btn">🥰</button>
+                        <button class="emoji-btn">😎</button>
+                        <button class="emoji-btn">🤔</button>
+                        <button class="emoji-btn">😴</button>
+                        <button class="emoji-btn">🥳</button>
+                        <button class="emoji-btn">😇</button>
+                        <button class="emoji-btn">🌟</button>
+                        <button class="emoji-btn">❤️</button>
+                        <button class="emoji-btn">🎉</button>
+                        <button class="emoji-btn">✨</button>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="emojiInput" placeholder="输入 emoji" maxlength="2">
+                        <button id="addEmojiBtn">添加</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">上传图片</div>
+                <div class="upload-container">
+                    <label class="upload-btn" for="imageUpload">
+                        选择图片
+                        <input type="file" id="imageUpload" accept="image/*" multiple style="display: none;">
+                    </label>
+                </div>
+                <div id="previewList" class="preview-list"></div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">壁纸尺寸</div>
+                <select id="sizeSelect" class="control-select">
+                    <option value="1920x1080">桌面 - 1920x1080 (FHD)</option>
+                    <option value="2560x1440">桌面 - 2560x1440 (2K)</option>
+                    <option value="3840x2160">桌面 - 3840x2160 (4K)</option>
+                    <option value="1080x1920">手机 - 1080x1920</option>
+                    <option value="1440x2560">手机 - 1440x2560</option>
+                    <option value="1284x2778">iPhone 13 Pro Max</option>
+                </select>
+            </div>
+
+            <div class="section">
+                <div class="section-title">效果设置</div>
+                <select id="patternSelect" class="control-select">
+                    <option value="spiral">螺旋效果</option>
+                    <option value="random">随机分布</option>
+                    <option value="float">浮动效果</option>
+                </select>
+                
+                <div class="control-group">
+                    <label>大图标尺寸</label>
+                    <input type="range" id="largeSize" min="40" max="120" value="80">
+                    <span id="largeSizeValue">80px</span>
+                </div>
+                
+                <div class="control-group">
+                    <label>小图标尺寸</label>
+                    <input type="range" id="smallSize" min="20" max="60" value="40">
+                    <span id="smallSizeValue">40px</span>
+                </div>
+                
+                <div class="control-group">
+                    <label>网格间距</label>
+                    <input type="range" id="gridSpacing" min="60" max="150" value="100">
+                    <span id="gridSpacingValue">100px</span>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">背景颜色</div>
+                <input type="color" id="bgColor" value="#FFD700" style="width: 100%;">
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="canvas"></canvas>
+            <div class="canvas-info" id="canvasInfo"></div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
